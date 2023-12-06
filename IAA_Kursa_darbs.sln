@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34221.43
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAA_Kursa_darbs", "IAA_Kursa_darbs.csproj", "{F2119511-7291-49B7-B2BF-3E4D0FA08338}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F2119511-7291-49B7-B2BF-3E4D0FA08338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2119511-7291-49B7-B2BF-3E4D0FA08338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2119511-7291-49B7-B2BF-3E4D0FA08338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2119511-7291-49B7-B2BF-3E4D0FA08338}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA09DB8F-A34C-4136-AA34-C63791DDB5A0}
+	EndGlobalSection
+EndGlobal
