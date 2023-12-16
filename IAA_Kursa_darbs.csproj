@@ -53,7 +53,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="HistogramClass.cs" />
+    <Compile Include="HistogramRGBClass.cs" />
     <Compile Include="ImageClass.cs" />
     <Compile Include="PixelRGB.cs" />
     <Compile Include="Program.cs" />

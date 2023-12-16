@@ -15,11 +15,10 @@ namespace IAA_Kursa_darbs
     public partial class Form1 : Form
     {
         public ImageClass imageClass = new ImageClass(); // Variable for the ImageClass.
-        private bool isWindowExanded = false;
+
         public Form1()
         {
             InitializeComponent();
-            // Original dimensions are: 800x500. Other than that is used for testing!
         }
 
         private void openImageToolStripMenuItem_Click(object sender, EventArgs e)
@@ -29,23 +28,8 @@ namespace IAA_Kursa_darbs
                 pictureBox1.Image = Image.FromFile(openFileDialog1.FileName); // Assign image to the first PictureBox
                 Bitmap bmp = (Bitmap)pictureBox1.Image.Clone(); // Get the Bitmap of that image
                 imageClass.ReadImage(bmp); // Use created Bitmap to get the image information
+                imageClass.histogram_original.DrawHistogram(chart1); // Draw a histogram
             }
-        }
-
-        private void moreToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (!isWindowExanded)
-            {
-                this.Size = new Size(1100, 500);
-                moreToolStripMenuItem.Text = "<< Less";
-            }
-            else
-            {
-                this.Size = new Size(800, 500);
-                moreToolStripMenuItem.Text = "More >>";
-            }
-
-            isWindowExanded = !isWindowExanded;
         }
     }
 }

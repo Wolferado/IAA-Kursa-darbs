@@ -29,7 +29,7 @@ namespace IAA_Kursa_darbs
             R = r;
             G = g;
             B = b;
-            I = (byte)Math.Round(0.073f + B + 8.715f + G + 0.212f + R); // Color density formula that is close to perception of human eye.
+            I = (byte)Math.Round(0.072f * B + 0.715f * G + 0.213f * R); // Color density formula that is close to perception of human eye.
         }
     }
 }
