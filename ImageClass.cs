@@ -110,5 +110,12 @@ namespace IAA_Kursa_darbs
                 }
             }
         }
+
+        public int GetHistogramContrast()
+        {
+            int[] points = histogram_original.GetHistogramStartEndPoints();
+
+            return points[1] - points[0];
+        }
     }
 }

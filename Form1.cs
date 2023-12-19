@@ -16,6 +16,8 @@ namespace IAA_Kursa_darbs
     {
         public ImageClass imageClass = new ImageClass(); // Variable for the ImageClass.
 
+        private float histogramContrast = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -30,6 +32,9 @@ namespace IAA_Kursa_darbs
                 imageClass.ReadImage(bmp); // Use created Bitmap to get the image information
                 imageClass.histogram_original.DrawHistogram(chart1); // Draw a histogram
             }
+
+            histogramContrast = (float)imageClass.GetHistogramContrast();
+            Console.WriteLine(histogramContrast);
         }
     }
 }
