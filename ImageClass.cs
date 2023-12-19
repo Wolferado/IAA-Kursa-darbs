@@ -14,7 +14,8 @@ namespace IAA_Kursa_darbs
         public PixelRGB[,] img_original; // Double dimensional array for original image.
         public PixelRGB[,] img_cleared; // Double dimensional array for clean image.
 
-        private int[,] img_noiseDiff;
+        private int[,] img_noiseDiff; // Double dimensional array for noise difference values.
+        private int[,] img_laplacian; // Double dimensional array for laplacian values.
 
         public HistogramRGBClass histogram_original; // Histogram for original image.
 
@@ -26,6 +27,7 @@ namespace IAA_Kursa_darbs
             img_cleared = new PixelRGB[bmp.Width, bmp.Height];
 
             img_noiseDiff = new int[bmp.Width, bmp.Height];
+            img_laplacian = new int[bmp.Width, bmp.Height];
 
             histogram_original = new HistogramRGBClass();
 
@@ -115,6 +117,7 @@ namespace IAA_Kursa_darbs
             }
         }
 
+        // Method to get Histogram contrast length [0...255] based on its bars.
         public int GetHistogramContrast()
         {
             int[] points = histogram_original.GetHistogramStartEndPoints();
@@ -123,11 +126,13 @@ namespace IAA_Kursa_darbs
 
         }
       
+        // Method to calculate variance based on the image values (mostly I values).
         private float CalculateVariance(int[,] image)
         {
             float count = 0;
             float sum = 0;
 
+            // Sum all the values and their count.
             for (int x = 0; x < image.GetLength(0); x++)
             {
                 for (int y = 0; y < image.GetLength(1); y++)
@@ -137,9 +142,11 @@ namespace IAA_Kursa_darbs
                 }
             }
 
+            // Find the median value.
             float median = sum / count;
             float variance = 0;
 
+            // Find overall variance.
             for (int x = 0; x < image.GetLength(0); x++)
             {
                 for (int y = 0; y < image.GetLength(1); y++)
@@ -148,13 +155,16 @@ namespace IAA_Kursa_darbs
                 }
             }
 
+            // Get median variance.
             return variance / count;
         }
 
+        // Method to calculate noise level.
         public float CalculateNoiseLevel()
         {
-            NoiseMedianFilter3x3();
+            NoiseMedianFilter3x3(); // Use median filter.
 
+            // Get each pixel difference between original and cleared image.
             for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
             {
                 for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
@@ -163,12 +173,14 @@ namespace IAA_Kursa_darbs
                 }
             }
 
+            // Get the variance of the noise difference 2D array.
             float mse = CalculateVariance(img_noiseDiff);
 
             return mse;
         }
 
-       public int[] GetBresenhamIntensityValues(int x0, int y0, int x1, int y1)
+        // Method to get vector values using Bresenham algorithm.
+        public int[] GetBresenhamIntensityValues(int x0, int y0, int x1, int y1)
         {
             int lengthOfRadius = (int)Math.Sqrt(Math.Pow(img_original.GetLength(0) / 2, 2) + Math.Pow(img_original.GetLength(0) / 2, 2));
             int[] result = new int[lengthOfRadius];
@@ -190,45 +202,56 @@ namespace IAA_Kursa_darbs
             return result;
         }
 
+        // Method to get vignette size.
         public float GetVignetteSize()
         {
+            // Get point of the image center.
             int centerX = img_original.GetLength(0) / 2;
             int centerY = img_original.GetLength(1) / 2;
 
+            // Get vectors that starts in each corner and go to the center.
             int[] leftUpperToCenter = GetBresenhamIntensityValues(0, 0, centerX, centerY);
             int[] leftLowerToCenter = GetBresenhamIntensityValues(0, img_original.GetLength(1) - 1, centerX, centerY);
             int[] rightLowerToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, img_original.GetLength(1) - 1, centerX, centerY);
             int[] rightUpperToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, 0, centerX, centerY);
 
+            // If all corners have vignette, then calculate vignette size.
             if (IsVignettePresent(leftUpperToCenter)
                 && IsVignettePresent(leftLowerToCenter)
                 && IsVignettePresent(rightUpperToCenter)
                 && IsVignettePresent(rightLowerToCenter))
                 return CalculateVignetteSize(leftUpperToCenter, rightUpperToCenter);
-            else
+            else // Otherwise return 0.
                 return 0;
         }
 
+        // Method to determine if vignette is present.
         private bool IsVignettePresent(int[] array)
         {
+            // For 10th of the image vector (array) length compare values
             for (int i = 0; i < array.Length / 10; i++)
             {
+                // If their difference is more or equals 10 OR array pixel is of whiter color, vignette is not present.
                 if (Math.Abs(array[i] - array[i + 1]) >= 10 || array[i] >= 128)
                 {
                     return false;
                 }
             }
 
+            // Otherwise, if values don't differ, vignette is present.
             return true;
         }
 
+        // Method to calculate vignette size.
         private float CalculateVignetteSize(int[] leftUpperArray, int[] rightUpperArray)
         {
             float result = 0.0f;
 
+            // Compare two arrays (top left and upper right vectors) for their difference. 
             for (int i = 0; i < leftUpperArray.Length - 1; i++)
             {
-                if (Math.Abs(leftUpperArray[i] - rightUpperArray[i]) >= 15)
+                // If arrays values differ too much, get the size.
+                if (Math.Abs(leftUpperArray[i] - rightUpperArray[i]) >= 15) 
                 {
                     result = i * 100 / leftUpperArray.Length;
                     break;
@@ -236,6 +259,44 @@ namespace IAA_Kursa_darbs
             }
 
             return result;
+        }
+
+        // Method to get Laplacian Filter value.
+        public float GetLaplacianFilterValue()
+        {
+            int[,] f = new int[3, 3] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } }; // Laplacian filter matrix.
+            int k = 0;
+
+            for (int fi = 0; fi < 3; fi++)
+                for (int fj = 0; fj < 3; fj++)
+                    k += f[fi, fj];
+
+            // Go through each pixel and get I value
+            for (int x = 1; x < img_original.GetLength(0) - 1; x++)
+            {
+                for (int y = 1; y < img_original.GetLength(1) - 1; y++)
+                {
+                    int i = 0;
+
+                    for (int fi = 0; fi < 3; fi++)
+                    {
+                        for (int fj = 0; fj < 3; fj++)
+                        {
+                            i += img_original[x + (fi - 1), y + (fj - 1)].I * f[fi, fj];
+                        }
+                    }
+
+                    // Prevent errors, if k is zero.
+                    if (k != 0)
+                        i = Math.Max(0, Math.Min(255, i /= k));
+                    else
+                        i = Math.Max(0, Math.Min(255, i));
+
+                    img_laplacian[x, y] = i;
+                }
+            }
+
+            return CalculateVariance(img_laplacian);
         }
     }
 }

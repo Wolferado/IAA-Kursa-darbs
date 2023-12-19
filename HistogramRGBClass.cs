@@ -88,6 +88,7 @@ namespace IAA_Kursa_darbs
             }
         }
 
+        // Method to get Histogram start and end points for I channel.
         public int[] GetHistogramStartEndPoints()
         {
             int startRange = -1;
