@@ -110,5 +110,75 @@ namespace IAA_Kursa_darbs
                 }
             }
         }
+
+        public int[] GetBresenhamIntensityValues(int x0, int y0, int x1, int y1)
+        {
+            int lengthOfRadius = (int)Math.Sqrt(Math.Pow(img_original.GetLength(0) / 2, 2) + Math.Pow(img_original.GetLength(0) / 2, 2));
+            int[] result = new int[lengthOfRadius];
+            int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int err = (dx > dy ? dx : -dy) / 2, e2;
+            int count = 0;
+
+            while (true)
+            {
+                result[count] = img_original[x0, y0].I;
+                if (x0 == x1 && y0 == y1) break;
+                e2 = err;
+                if (e2 > -dx) { err -= dy; x0 += sx; }
+                if (e2 < dy) { err += dx; y0 += sy; }
+                count++;
+            }
+
+            return result;
+        }
+
+        public float GetVignetteSize()
+        {
+            int centerX = img_original.GetLength(0) / 2;
+            int centerY = img_original.GetLength(1) / 2;
+
+            int[] leftUpperToCenter = GetBresenhamIntensityValues(0, 0, centerX, centerY);
+            int[] leftLowerToCenter = GetBresenhamIntensityValues(0, img_original.GetLength(1) - 1, centerX, centerY);
+            int[] rightLowerToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, img_original.GetLength(1) - 1, centerX, centerY);
+            int[] rightUpperToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, 0, centerX, centerY);
+
+            if (IsVignettePresent(leftUpperToCenter)
+                && IsVignettePresent(leftLowerToCenter)
+                && IsVignettePresent(rightUpperToCenter)
+                && IsVignettePresent(rightLowerToCenter))
+                return CalculateVignetteSize(leftUpperToCenter, rightUpperToCenter);
+            else
+                return 0;
+        }
+
+        private bool IsVignettePresent(int[] array)
+        {
+            for (int i = 0; i < array.Length / 10; i++)
+            {
+                if (Math.Abs(array[i] - array[i + 1]) >= 10 || array[i] >= 128)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private float CalculateVignetteSize(int[] leftUpperArray, int[] rightUpperArray)
+        {
+            float result = 0.0f;
+
+            for (int i = 0; i < leftUpperArray.Length - 1; i++)
+            {
+                if (Math.Abs(leftUpperArray[i] - rightUpperArray[i]) >= 15)
+                {
+                    result = i * 100 / leftUpperArray.Length;
+                    break;
+                }
+            }
+
+            return result;
+        }
     }
 }
