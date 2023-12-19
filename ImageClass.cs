@@ -12,7 +12,9 @@ namespace IAA_Kursa_darbs
     public class ImageClass
     {
         public PixelRGB[,] img_original; // Double dimensional array for original image.
-        public PixelRGB[,] img_rgb; // Double dimensional array for original image.
+        public PixelRGB[,] img_cleared; // Double dimensional array for clean image.
+
+        private int[,] img_noiseDiff;
 
         public HistogramRGBClass histogram_original; // Histogram for original image.
 
@@ -21,7 +23,9 @@ namespace IAA_Kursa_darbs
         {
             // Assigning to the local variables Bitmap's parameters of width and height.
             img_original = new PixelRGB[bmp.Width, bmp.Height];
-            img_rgb = new PixelRGB[bmp.Width, bmp.Height];
+            img_cleared = new PixelRGB[bmp.Width, bmp.Height];
+
+            img_noiseDiff = new int[bmp.Width, bmp.Height];
 
             histogram_original = new HistogramRGBClass();
 
@@ -53,7 +57,7 @@ namespace IAA_Kursa_darbs
                 {
                     // Assign to the variables information about the image (with one pixel at the time).
                     img_original[x, y] = new PixelRGB(row[pixelComponents * x + 2], row[pixelComponents * x + 1], row[pixelComponents * x]);
-                    img_rgb[x, y] = new PixelRGB(row[pixelComponents * x + 2], row[pixelComponents * x + 1], row[pixelComponents * x]);
+                    img_cleared[x, y] = new PixelRGB(row[pixelComponents * x + 2], row[pixelComponents * x + 1], row[pixelComponents * x]);
                 }
             }
             bmp.UnlockBits(bmpData); // Freeing up the assigned memory
@@ -84,10 +88,10 @@ namespace IAA_Kursa_darbs
                     Array.Sort(i_values);
 
                     // Apply the median value to the pixel
-                    img_rgb[x, y].R = (byte)r_values[4];
-                    img_rgb[x, y].G = (byte)g_values[4];
-                    img_rgb[x, y].B = (byte)b_values[4];
-                    img_rgb[x, y].I = (byte)i_values[4];
+                    img_cleared[x, y].R = (byte)r_values[4];
+                    img_cleared[x, y].G = (byte)g_values[4];
+                    img_cleared[x, y].B = (byte)b_values[4];
+                    img_cleared[x, y].I = (byte)i_values[4];
                 }
             }
         }
@@ -109,6 +113,51 @@ namespace IAA_Kursa_darbs
                     counter++;
                 }
             }
+        }
+
+        private float CalculateVariance(int[,] image)
+        {
+            float count = 0;
+            float sum = 0;
+
+            for (int x = 0; x < image.GetLength(0); x++)
+            {
+                for (int y = 0; y < image.GetLength(1); y++)
+                {
+                    count++;
+                    sum += image[x, y];
+                }
+            }
+
+            float median = sum / count;
+            float variance = 0;
+
+            for (int x = 0; x < image.GetLength(0); x++)
+            {
+                for (int y = 0; y < image.GetLength(1); y++)
+                {
+                    variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
+                }
+            }
+
+            return variance / count;
+        }
+
+        public float CalculateNoiseLevel()
+        {
+            NoiseMedianFilter3x3();
+
+            for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
+            {
+                for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
+                {
+                    img_noiseDiff[x, y] = img_cleared[x, y].I - img_original[x, y].I;
+                }
+            }
+
+            float mse = CalculateVariance(img_noiseDiff);
+
+            return mse;
         }
     }
 }
