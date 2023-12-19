@@ -115,49 +115,57 @@ namespace IAA_Kursa_darbs
             }
         }
 
+        public int GetHistogramContrast()
+        {
+            int[] points = histogram_original.GetHistogramStartEndPoints();
+
+            return points[1] - points[0];
+
+        }
+      
         private float CalculateVariance(int[,] image)
-        {
-            float count = 0;
-            float sum = 0;
+          {
+              float count = 0;
+              float sum = 0;
 
-            for (int x = 0; x < image.GetLength(0); x++)
-            {
-                for (int y = 0; y < image.GetLength(1); y++)
-                {
-                    count++;
-                    sum += image[x, y];
-                }
-            }
+              for (int x = 0; x < image.GetLength(0); x++)
+              {
+                  for (int y = 0; y < image.GetLength(1); y++)
+                  {
+                      count++;
+                      sum += image[x, y];
+                  }
+              }
 
-            float median = sum / count;
-            float variance = 0;
+              float median = sum / count;
+              float variance = 0;
 
-            for (int x = 0; x < image.GetLength(0); x++)
-            {
-                for (int y = 0; y < image.GetLength(1); y++)
-                {
-                    variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
-                }
-            }
+              for (int x = 0; x < image.GetLength(0); x++)
+              {
+                  for (int y = 0; y < image.GetLength(1); y++)
+                  {
+                      variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
+                  }
+              }
 
-            return variance / count;
-        }
+              return variance / count;
+          }
 
-        public float CalculateNoiseLevel()
-        {
-            NoiseMedianFilter3x3();
+          public float CalculateNoiseLevel()
+          {
+              NoiseMedianFilter3x3();
 
-            for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
-            {
-                for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
-                {
-                    img_noiseDiff[x, y] = img_cleared[x, y].I - img_original[x, y].I;
-                }
-            }
+              for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
+              {
+                  for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
+                  {
+                      img_noiseDiff[x, y] = img_cleared[x, y].I - img_original[x, y].I;
+                  }
+              }
 
-            float mse = CalculateVariance(img_noiseDiff);
+              float mse = CalculateVariance(img_noiseDiff);
 
-            return mse;
-        }
+              return mse;
+          }
     }
 }
