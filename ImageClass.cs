@@ -124,48 +124,118 @@ namespace IAA_Kursa_darbs
         }
       
         private float CalculateVariance(int[,] image)
-          {
-              float count = 0;
-              float sum = 0;
+        {
+            float count = 0;
+            float sum = 0;
 
-              for (int x = 0; x < image.GetLength(0); x++)
-              {
-                  for (int y = 0; y < image.GetLength(1); y++)
-                  {
-                      count++;
-                      sum += image[x, y];
-                  }
-              }
+            for (int x = 0; x < image.GetLength(0); x++)
+            {
+                for (int y = 0; y < image.GetLength(1); y++)
+                {
+                    count++;
+                    sum += image[x, y];
+                }
+            }
 
-              float median = sum / count;
-              float variance = 0;
+            float median = sum / count;
+            float variance = 0;
 
-              for (int x = 0; x < image.GetLength(0); x++)
-              {
-                  for (int y = 0; y < image.GetLength(1); y++)
-                  {
-                      variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
-                  }
-              }
+            for (int x = 0; x < image.GetLength(0); x++)
+            {
+                for (int y = 0; y < image.GetLength(1); y++)
+                {
+                    variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
+                }
+            }
 
-              return variance / count;
-          }
+            return variance / count;
+        }
 
-          public float CalculateNoiseLevel()
-          {
-              NoiseMedianFilter3x3();
+        public float CalculateNoiseLevel()
+        {
+            NoiseMedianFilter3x3();
 
-              for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
-              {
-                  for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
-                  {
-                      img_noiseDiff[x, y] = img_cleared[x, y].I - img_original[x, y].I;
-                  }
-              }
+            for (int x = 0; x < img_noiseDiff.GetLength(0); x++)
+            {
+                for (int y = 0; y < img_noiseDiff.GetLength(1); y++)
+                {
+                    img_noiseDiff[x, y] = img_cleared[x, y].I - img_original[x, y].I;
+                }
+            }
 
-              float mse = CalculateVariance(img_noiseDiff);
+            float mse = CalculateVariance(img_noiseDiff);
 
-              return mse;
-          }
+            return mse;
+        }
+
+       public int[] GetBresenhamIntensityValues(int x0, int y0, int x1, int y1)
+        {
+            int lengthOfRadius = (int)Math.Sqrt(Math.Pow(img_original.GetLength(0) / 2, 2) + Math.Pow(img_original.GetLength(0) / 2, 2));
+            int[] result = new int[lengthOfRadius];
+            int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int err = (dx > dy ? dx : -dy) / 2, e2;
+            int count = 0;
+
+            while (true)
+            {
+                result[count] = img_original[x0, y0].I;
+                if (x0 == x1 && y0 == y1) break;
+                e2 = err;
+                if (e2 > -dx) { err -= dy; x0 += sx; }
+                if (e2 < dy) { err += dx; y0 += sy; }
+                count++;
+            }
+
+            return result;
+        }
+
+        public float GetVignetteSize()
+        {
+            int centerX = img_original.GetLength(0) / 2;
+            int centerY = img_original.GetLength(1) / 2;
+
+            int[] leftUpperToCenter = GetBresenhamIntensityValues(0, 0, centerX, centerY);
+            int[] leftLowerToCenter = GetBresenhamIntensityValues(0, img_original.GetLength(1) - 1, centerX, centerY);
+            int[] rightLowerToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, img_original.GetLength(1) - 1, centerX, centerY);
+            int[] rightUpperToCenter = GetBresenhamIntensityValues(img_original.GetLength(0) - 1, 0, centerX, centerY);
+
+            if (IsVignettePresent(leftUpperToCenter)
+                && IsVignettePresent(leftLowerToCenter)
+                && IsVignettePresent(rightUpperToCenter)
+                && IsVignettePresent(rightLowerToCenter))
+                return CalculateVignetteSize(leftUpperToCenter, rightUpperToCenter);
+            else
+                return 0;
+        }
+
+        private bool IsVignettePresent(int[] array)
+        {
+            for (int i = 0; i < array.Length / 10; i++)
+            {
+                if (Math.Abs(array[i] - array[i + 1]) >= 10 || array[i] >= 128)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private float CalculateVignetteSize(int[] leftUpperArray, int[] rightUpperArray)
+        {
+            float result = 0.0f;
+
+            for (int i = 0; i < leftUpperArray.Length - 1; i++)
+            {
+                if (Math.Abs(leftUpperArray[i] - rightUpperArray[i]) >= 15)
+                {
+                    result = i * 100 / leftUpperArray.Length;
+                    break;
+                }
+            }
+
+            return result;
+        }
     }
 }
