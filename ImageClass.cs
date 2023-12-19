@@ -15,6 +15,7 @@ namespace IAA_Kursa_darbs
         public PixelRGB[,] img_cleared; // Double dimensional array for clean image.
 
         private int[,] img_noiseDiff;
+        private int[,] img_laplacian;
 
         public HistogramRGBClass histogram_original; // Histogram for original image.
 
@@ -26,6 +27,7 @@ namespace IAA_Kursa_darbs
             img_cleared = new PixelRGB[bmp.Width, bmp.Height];
 
             img_noiseDiff = new int[bmp.Width, bmp.Height];
+            img_laplacian = new int[bmp.Width, bmp.Height];
 
             histogram_original = new HistogramRGBClass();
 
@@ -236,6 +238,44 @@ namespace IAA_Kursa_darbs
             }
 
             return result;
+        }
+
+        // Method to get Laplacian Filter value.
+        public float GetLaplacianFilterValue()
+        {
+            int[,] f = new int[3, 3] { { 0, 1, 0 }, { 1, -4, 1 }, { 0, 1, 0 } }; // Laplacian filter matrix.
+            int k = 0;
+
+            for (int fi = 0; fi < 3; fi++)
+                for (int fj = 0; fj < 3; fj++)
+                    k += f[fi, fj];
+
+            // Go through each pixel and get I value
+            for (int x = 1; x < img_original.GetLength(0) - 1; x++)
+            {
+                for (int y = 1; y < img_original.GetLength(1) - 1; y++)
+                {
+                    int i = 0;
+
+                    for (int fi = 0; fi < 3; fi++)
+                    {
+                        for (int fj = 0; fj < 3; fj++)
+                        {
+                            i += img_original[x + (fi - 1), y + (fj - 1)].I * f[fi, fj];
+                        }
+                    }
+
+
+                    if (k != 0)
+                        i = Math.Max(0, Math.Min(255, i /= k));
+                    else
+                        i = Math.Max(0, Math.Min(255, i));
+
+                    img_laplacian[x, y] = i;
+                }
+            }
+
+            return CalculateVariance(img_laplacian);
         }
     }
 }
