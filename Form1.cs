@@ -16,7 +16,10 @@ namespace IAA_Kursa_darbs
     {
         public ImageClass imageClass = new ImageClass(); // Variable for the ImageClass.
 
+        private float histogramContrast = 0;
+        private float noiseLevel = 0.0f;
         private float vignetteSize = 0.0f;
+
 
         public Form1()
         {
@@ -33,6 +36,10 @@ namespace IAA_Kursa_darbs
                 imageClass.histogram_original.DrawHistogram(chart1); // Draw a histogram
             }
 
+            histogramContrast = (float)imageClass.GetHistogramContrast();
+            Console.WriteLine(histogramContrast);
+            noiseLevel = imageClass.CalculateNoiseLevel();
+            Console.WriteLine(noiseLevel);
             vignetteSize = imageClass.GetVignetteSize();
             Console.WriteLine(vignetteSize);
         }
