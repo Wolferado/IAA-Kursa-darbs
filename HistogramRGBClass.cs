@@ -16,6 +16,8 @@ namespace IAA_Kursa_darbs
         public int[] hB;
         public int[] hI;
 
+        private int maximumHeight = 0;
+
         // HistogramClass consturctor (all values are 0).
         public HistogramRGBClass()
         {
@@ -51,6 +53,9 @@ namespace IAA_Kursa_darbs
                     hG[img[x, y].G]++;
                     hB[img[x, y].B]++;
                     hI[img[x, y].I]++;
+
+                    if (hI[img[x, y].I] > maximumHeight)
+                        maximumHeight = hI[img[x, y].I];
                 }
             }
         }
@@ -81,6 +86,26 @@ namespace IAA_Kursa_darbs
                 chart.Series["B"].Points.AddXY(i, hB[i]);
                 chart.Series["I"].Points.AddXY(i, hI[i]);
             }
+        }
+
+        public int[] GetHistogramStartEndPoints()
+        {
+            int startRange = -1;
+            int endRange = -1;
+
+            for (int i = 0; i < 256; i++)
+            {
+                if (hI[i] > maximumHeight / 50 && startRange == -1)
+                    startRange = i;
+            }
+
+            for (int i = 255; i >= 0; i--)
+            {
+                if (hI[i] > maximumHeight / 50 && endRange == -1)
+                    endRange = i;
+            }
+
+            return new int[2] { startRange, endRange };
         }
     }
 }
