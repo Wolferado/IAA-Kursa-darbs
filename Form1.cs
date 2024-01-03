@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -63,87 +64,62 @@ namespace IAA_Kursa_darbs
                 laplacianFilterValue = imageClass.GetLaplacianFilterValue();
                 //Console.WriteLine(laplacianFilterValue);
 
-                ClearTrackBarsLabels();
                 UpdateImageTrackBars();
                 UpdateDetailedInfo();
             }
         }
 
-        // Method that removes every formatting of each metrics label.
-        private void ClearTrackBarsLabels()
-        {
-            lowContrastLabel.Font = new Font(lowContrastLabel.Font, FontStyle.Regular);
-            mediumContrastLabel.Font = new Font(mediumContrastLabel.Font, FontStyle.Regular);
-            highContrastLabel.Font = new Font(highContrastLabel.Font, FontStyle.Regular);
-
-            blurryFocusLabel.Font = new Font(blurryFocusLabel.Font, FontStyle.Regular);
-            focusedFocusLabel.Font = new Font(focusedFocusLabel.Font, FontStyle.Regular);
-
-            noiselessNoiseLabel.Font = new Font(noiselessNoiseLabel.Font, FontStyle.Regular);
-            noisyNoiseLabel.Font = new Font(noisyNoiseLabel.Font, FontStyle.Regular);
-            veryNoisyNoiseLabel.Font = new Font(veryNoisyNoiseLabel.Font, FontStyle.Regular);
-
-            noneVignetteLabel.Font = new Font(noneVignetteLabel.Font, FontStyle.Regular);
-            existsVignetteLabel.Font = new Font(existsVignetteLabel.Font, FontStyle.Regular);
-        }
-
         // Method to update trackbars for the metrics.
         private void UpdateImageTrackBars()
         {
-            // Contrast
-            if (histogramContrast < 86)
-                lowContrastLabel.Font = new Font(lowContrastLabel.Font, FontStyle.Bold);
-            else if (histogramContrast >= 86 && histogramContrast < 172)
-                mediumContrastLabel.Font = new Font(mediumContrastLabel.Font, FontStyle.Bold);
-            else
-                highContrastLabel.Font = new Font(highContrastLabel.Font, FontStyle.Bold);
-            contrastTrackBar.Value = (int)histogramContrast * contrastTrackBar.Maximum / 256;
+            // Slider Min Position X: 417
+            // Slider Max Position Y: 737
+            // Slider Overall Length: 120
 
+            // Contrast
+            // Position Y: 58
+            int contrastSliderXPos = 58;
+            contrastSlider.Location = new Point((417 + (int)(histogramContrast * 1.2f)), contrastSliderXPos);
 
             // Focus
+            // Position Y: 134
+            int focusSliderXPos = 134;
             if (laplacianFilterValue < 100)
             {
-                focusTrackBar.Value = (int)laplacianFilterValue / 4;
-                blurryFocusLabel.Font = new Font(blurryFocusLabel.Font, FontStyle.Bold);
+                focusSlider.Location = new Point(417 + (int)(laplacianFilterValue / 4 * 3), focusSliderXPos);
             }
             else if (laplacianFilterValue > 200)
             {
-                focusTrackBar.Value = focusTrackBar.Maximum;
-                focusedFocusLabel.Font = new Font(blurryFocusLabel.Font, FontStyle.Bold);
+                focusSlider.Location = new Point(737, focusSliderXPos);
             }
             else
             {
-                focusTrackBar.Value = (int)laplacianFilterValue / 4;
-                focusedFocusLabel.Font = new Font(blurryFocusLabel.Font, FontStyle.Bold);
+                focusSlider.Location = new Point(417 + (int)(laplacianFilterValue / 4 * 3), focusSliderXPos);
             }
 
             // Noise
+            // Position Y: 211
+            int noiseSliderXPos = 211;
             if (noiseLevel <= 30)
             {
-                noiseTrackBar.Value = (int)noiseLevel / 4;
-                noiselessNoiseLabel.Font = new Font(noiselessNoiseLabel.Font, FontStyle.Bold);
+                noiseSlider.Location = new Point(417 + (int)(noiseLevel / 4 * 3), noiseSliderXPos);
             }
             else if (noiseLevel > 30 && noiseLevel < 130)
             {
-                noiseTrackBar.Value = (int)noiseLevel / 4;
-                noisyNoiseLabel.Font = new Font(noisyNoiseLabel.Font, FontStyle.Bold);
+                noiseSlider.Location = new Point(417 + (int)(noiseLevel / 4 * 3), noiseSliderXPos);
             }
             else
             {
                 if (noiseLevel > 200)
-                    noiseTrackBar.Value = noiseTrackBar.Maximum;
+                    noiseSlider.Location = new Point(737, noiseSliderXPos);
                 else
-                    noiseTrackBar.Value = (int)noiseLevel / 4;
-
-                veryNoisyNoiseLabel.Font = new Font(veryNoisyNoiseLabel.Font, FontStyle.Bold);
+                    noiseSlider.Location = new Point(417 + (int)(noiseLevel / 4 * 3), noiseSliderXPos);
             }
 
             // Vignette
-            vignetteTrackBar.Value = (int)vignetteSize / 2;
-            if (vignetteSize == 0)
-                noneVignetteLabel.Font = new Font(noneVignetteLabel.Font, FontStyle.Bold);
-            else
-                existsVignetteLabel.Font = new Font(existsVignetteLabel.Font, FontStyle.Bold);
+            // Position Y: 288
+            int vignetteSliderXPos = 288;
+            vignetteSlider.Location = new Point((417 + (int)(vignetteSize * 3)), vignetteSliderXPos);
         }
 
         // Method to update detailed info in the textbox.
