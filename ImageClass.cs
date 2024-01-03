@@ -144,19 +144,19 @@ namespace IAA_Kursa_darbs
 
             // Find the median value.
             float median = sum / count;
-            float variance = 0;
+            float sumOfVariance = 0;
 
             // Find overall variance.
             for (int x = 0; x < image.GetLength(0); x++)
             {
                 for (int y = 0; y < image.GetLength(1); y++)
                 {
-                    variance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
+                    sumOfVariance += (float)Math.Pow(Math.Abs((image[x, y] - median)), 2);
                 }
             }
 
             // Get median variance.
-            return variance / count;
+            return sumOfVariance / count;
         }
 
         // Method to calculate noise level.
