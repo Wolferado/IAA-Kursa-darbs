@@ -14,3 +14,6 @@
 
 ### Work principle:
 The whole explanation on how program works is available in PDF file that is available [here](/Image_Evaluation_Principles.pdf) _(in Latvian)_.
+
+### Preview:
+![App preview](/materials/App_preview.png)
